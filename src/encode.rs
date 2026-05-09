@@ -17,4 +17,22 @@ pub fn encode_png(path: &str, cell_w: u32, cell_h: u32) -> EncodedImage {
     let resized = img.resize(target_px_w, target_px_h, FilterType::Lanczos3);
 
     let (w, h) = resized.dimensions();
+
+    // Convert to rgba and apply opacity
+    let mut rgba = resized.to_rgba8();
+    for pixel in rgba.pixels_mut() {
+        pixel[3] = (pixel[3] as f32 * 0.30) as u8;// 30% opacity
+    } 
+
+    let raw Vec<u8> = rgba.into_raw();
+    let encoded = general_purpose::STANDARD::encode(&raw);
+
+    // Chunk into <= 4096 byte pieces, each chunk length must be multiple of 4
+    let chunks: Vec<String> = encoded
+        .as_bytes()
+        .chunks(4096)
+        .map(|c| String::from_utf8(c.to_vec()).unwrap())
+        .collect();
+
+    EncodedImage { chunks, width: w, height: h }
 }
