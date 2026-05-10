@@ -1,6 +1,6 @@
 mod encode;
 mod kitty;
-use clap::parser;
+use clap::Parser;
 
 #[derive(Parser)]
 struct Args {

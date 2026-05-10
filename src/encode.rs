@@ -24,8 +24,8 @@ pub fn encode_png(path: &str, cell_w: u32, cell_h: u32) -> EncodedImage {
         pixel[3] = (pixel[3] as f32 * 0.30) as u8;// 30% opacity
     } 
 
-    let raw Vec<u8> = rgba.into_raw();
-    let encoded = general_purpose::STANDARD::encode(&raw);
+    let raw: Vec<u8> = rgba.into_raw();
+    let encoded = general_purpose::STANDARD.encode(&raw);
 
     // Chunk into <= 4096 byte pieces, each chunk length must be multiple of 4
     let chunks: Vec<String> = encoded
