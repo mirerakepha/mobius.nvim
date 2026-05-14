@@ -1,9 +1,13 @@
 use crate::encode::EncodedImage;
 use std::io::{self, Write};
 
-pub fn transmit_and_place(img: &EncodedImage, image_id: u32, col: u16, row: u16) {
+pub fn transmit_and_place(img: &EncodedImage, _image_id: u32, col: u16, row: u16) {
     let stdout = io::stdout();
     let mut out = stdout.lock();
+
+    // Move cursor to target position first
+    // ESC[{row};{col}H  — positions cursor at row, col (1-based)
+    write!(out, "\x1b[{};{}H", row, col).unwrap();
 
     let total = img.chunks.len();
     for (i, chunk) in img.chunks.iter().enumerate() {
@@ -11,27 +15,21 @@ pub fn transmit_and_place(img: &EncodedImage, image_id: u32, col: u16, row: u16)
         let m = if is_last { 0 } else { 1 };
 
         if i == 0 {
-            // First chunk carries all metadata
-            // f=32 = RGBA raw pixels, s=width, v=height, i=image_id
-            // q=2 = suppress all responses
-            // C=1 = do not move cursor after transmission
-            write!(out,
-                "\x1b_Ga=T,f=32,s={},v={},i={},q=2,C=1,m={};{}\x1b\\",
-                img.width, img.height, image_id, m, chunk
-            ).unwrap();
-
+            // a=T = transmit and display immediately at current cursor position
+            // f=32 = raw RGBA, s=width, v=height
+            // C=1 = don't move cursor after display
+            // q=2 = suppress terminal response
+            write!(
+                out,
+                //"\x1b_Ga=T,f=32,s={},v={},C=1,q=2,m={};{}\x1b\\",
+                "\x1b_Ga=T,f=100,C=1,q=2,m={};{}\x1b\\",
+                /*img.width, img.height,*/ m, chunk
+            )
+            .unwrap();
         } else {
             write!(out, "\x1b_Gm={};{}\x1b\\", m, chunk).unwrap();
         }
     }
-
-    // Separate placement command: position at (col, row), z=-1 (below text)
-    // X/Y are 1-based column/row in terminal cells
-    write!(
-        out,
-        "\x1b_Ga=p,i={},p=1,X={},Y={},z=-1,q=2\x1b\\",
-        image_id, col, row
-    ).unwrap();
 
     out.flush().unwrap();
 }

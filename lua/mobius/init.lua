@@ -1,22 +1,32 @@
+local M = {}
+
 local detect = require("mobius.detect")
 local overlay = require("mobius.overlay")
 local kitty = require("mobius.kitty")
 
-local binary = vim.fn.stdpath("data") .. "/mobius/bin/mobius"
+-- local BINARY = vim.fn.stdpath("data") .. "/mobius/bin/mobius"
+local BINARY = vim.fn.expand("~/RustProjects/mobius/target/release/mobius")
 local current_id = nil
+local cell_w = nil
+local cell_h = nil
+
 
 local function show()
+    if vim.fn.executable(BINARY) == 0 then return end
+
     local ft = vim.bo.filetype
     local png = detect.get_png(ft)
-    if not png then return end
+    if not png or vim.fn.filereadable(png) == 0 then return end
 
     -- clean up prev image
     if current_id then kitty.delete(current_id) end
     overlay.close()
 
+    if not cell_w then
+        cell_w, cell_h = kitty.get_cell_size()
+    end
 
     local col, row = overlay.get_position()
-    local cell_w, cell_h = kitty.get_cell_size()
     current_id = math.random(1, 999999)
 
     -- claim text area so nvim text doesnt bleed through
@@ -29,12 +39,12 @@ local function show()
         "--id", tostring(current_id),
         "--col", tostring(col),
         "--row", tostring(row),
-        "cell_w", tostring(cell_w),
-        "cell_h", tostring(cell_h),
+        "--cell-w", tostring(cell_w),
+        "--cell-h", tostring(cell_h),
     }, {
         on_exit = function(_, code)
             if code ~= 0 then
-                vim.notify("mobius: render failed", vim.logs.levels.WARN)
+                vim.notify("[mobius] render failed (exit " .. code .. ")", vim.log.levels.WARN)
             end
         end
     })
@@ -49,14 +59,26 @@ local function hide()
     overlay.close()
 end
 
---autocommands
-local grp = vim.api.nvim_create_augroup("mobius", {clear = true})
-vim.api.nvim_create_autocmd({"BufEnter", "BufWinEnter"}, {
-    group = grp, callback = show
-})
-vim.api.nvim_create_autocmd("VimResized", {
-    group = grp, callback = function() hide(); show() end,
-})
-vim.api.nvim_create_autocmd({"BufLeave", "VimLeave"}, {
-    group = grp, callback = hide
-})
+function M.setup()
+    if vim.fn.executable(BINARY) == 0 then
+        vim.notify("[mobius] binary not found: " .. BINARY, vim.log.levels.WARN)
+        return
+    end
+
+    local grp = vim.api.nvim_create_augroup("mobius", { clear = true })
+
+    vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
+        group    = grp,
+        callback = show,
+    })
+    vim.api.nvim_create_autocmd("VimResized", {
+        group    = grp,
+        callback = function() cell_w = nil; hide(); show() end,
+    })
+    vim.api.nvim_create_autocmd({ "BufLeave", "VimLeave" }, {
+        group    = grp,
+        callback = hide,
+    })
+end
+
+return M

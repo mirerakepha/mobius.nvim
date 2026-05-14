@@ -13,7 +13,7 @@ function M.get_cell_size()
 
     if fd then
         resp = fd:read(32) or ""
-        fd.close()
+        fd:close()
     end
 
     local h, w = resp:match("\x1b%[6;(%d+);(%d+)t")

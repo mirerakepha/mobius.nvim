@@ -17,7 +17,7 @@ fn main() {
 
     let args = Args::parse();
     
-    let img = encode::encode_png(&args.png, args.cell_w, args.cell_h);
+    let img = encode::encode_png(&args.png /*, args.cell_w, args.cell_h */);
     
     kitty::transmit_and_place(&img, args.id, args.col, args.row);
     

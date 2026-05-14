@@ -1,3 +1,27 @@
+use std::fs;
+
+pub struct EncodedImage {
+    pub chunks: Vec<String>,
+}
+
+pub fn encode_png(path: &str) -> EncodedImage {
+    use base64::{engine::general_purpose, Engine};
+
+    // Read the PNG file as-is and base64 encode it
+    // f=100 tells Kitty to decode it as PNG natively
+    let bytes = fs::read(path).expect("cannot read PNG");
+    let encoded = general_purpose::STANDARD.encode(&bytes);
+
+    let chunks: Vec<String> = encoded
+        .as_bytes()
+        .chunks(4096)
+        .map(|c| String::from_utf8(c.to_vec()).unwrap())
+        .collect();
+
+    EncodedImage { chunks }
+}
+
+/*
 use base64::{engine::general_purpose, Engine};
 use image::{imageops::FilterType, GenericImageView};
 
@@ -21,7 +45,7 @@ pub fn encode_png(path: &str, cell_w: u32, cell_h: u32) -> EncodedImage {
     // Convert to rgba and apply opacity
     let mut rgba = resized.to_rgba8();
     for pixel in rgba.pixels_mut() {
-        pixel[3] = (pixel[3] as f32 * 0.30) as u8;// 30% opacity
+        pixel[3] = (pixel[3] as f32 * 0.50) as u8;// 30% opacity
     } 
 
     let raw: Vec<u8> = rgba.into_raw();
@@ -36,3 +60,4 @@ pub fn encode_png(path: &str, cell_w: u32, cell_h: u32) -> EncodedImage {
 
     EncodedImage { chunks, width: w, height: h }
 }
+*/
