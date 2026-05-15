@@ -23,8 +23,8 @@ pub fn encode_png(path: &str) -> EncodedImage {
             pixel[0] = (pixel[0] as f32 * 0.3 + tint_r * 0.7) as u8;
             pixel[1] = (pixel[1] as f32 * 0.3 + tint_g * 0.7) as u8;
             pixel[2] = (pixel[2] as f32 * 0.3 + tint_b * 0.7) as u8;
-            // set alpha to 40% so it's visible but watermark-like
-            pixel[3] = (a * 255.0 * 0.65) as u8;
+            // opacity
+            pixel[3] = (a * 255.0 * 0.30) as u8;
         }
     }
 
@@ -57,7 +57,7 @@ pub fn save_tinted(path: &str, out_path: &str) {
             pixel[0] = (pixel[0] as f32 * 0.3 + tint_r * 0.7) as u8;
             pixel[1] = (pixel[1] as f32 * 0.3 + tint_g * 0.7) as u8;
             pixel[2] = (pixel[2] as f32 * 0.3 + tint_b * 0.7) as u8;
-            pixel[3] = (a * 255.0 * 0.65) as u8;
+            pixel[3] = (a * 255.0 * 0.30) as u8;
         }
     }
 

@@ -3,8 +3,8 @@ local kitty = require("mobius.kitty")
 
 local LOGO_COLS = 6
 local LOGO_ROWS = 3
-local PAD_RIGHT = 4 -- from right edge
-local PAD_BOTTOM = 3 -- from bottom edge
+local PAD_RIGHT = 12 -- from right edge
+local PAD_BOTTOM = 6 -- from bottom edge
 
 function M.get_position()
     local ui = vim.api.nvim_list_uis()[1]

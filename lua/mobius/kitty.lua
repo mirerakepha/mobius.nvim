@@ -35,7 +35,9 @@ function M.send(png_path, col, row)
     local total = #b64
     local pos = 1
     local first = true
+    local image_id = 12345 -- fixed so we can delete and replace it
 
+    -- transmit with fixed id,, store but dont transmit yet
     while pos <= total do
         local chunk = b64:sub(pos, pos + chunk_size - 1)
         pos = pos + chunk_size
@@ -44,7 +46,8 @@ function M.send(png_path, col, row)
 
         if first then
             seq = seq .. string.format(
-                "\x1b_Ga=T,f=100,C=1,q=2,m=%d;%s\x1b\\", m, chunk
+                "\x1b_Ga=t,f=100,q=2,i=%d,m=%d;%s\x1b\\",
+                image_id, m, chunk
             )
             first = false
         else
@@ -52,11 +55,18 @@ function M.send(png_path, col, row)
         end
     end
 
+    -- replace it at cursor pos
+    seq = seq .. string.format(
+        "\x1b_Ga=p,i=%d,q=2,C=1\x1b\\", image_id
+    )
+
     send_to_kitty(seq)
 end
 
 function M.delete(image_id)
-    send_to_kitty(string.format("\x1b_Ga=d,d=i,i=%d\x1b\\", image_id))
+    send_to_kitty(string.format(
+        "\x1b_Ga=d,d=i,i=%d\x1b\\", image_id
+    ))
 end
 
 return M

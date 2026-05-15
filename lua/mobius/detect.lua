@@ -1,4 +1,5 @@
 --local assets = vim.fn.stdpath("data") .. "/mobius/assets/"
+    -- decode PNG to raw RGBA using the RS binary as a converter
 local assets = vim.fn.expand("~/RustProjects/mobius/assets/")
 
 local map = {

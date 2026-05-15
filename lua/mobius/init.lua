@@ -5,6 +5,7 @@ local detect  = require("mobius.detect")
 local overlay = require("mobius.overlay")
 local kitty   = require("mobius.kitty")
 
+local WATERMARK_ID = 12345 -- fixed
 local current_id = nil
 local cell_w     = nil
 local cell_h     = nil
@@ -14,7 +15,10 @@ local function show()
     local png = detect.get_png(ft)
     if not png or vim.fn.filereadable(png) == 0 then return end
 
-    if current_id then kitty.delete(current_id) end
+    -- if current_id then kitty.delete(current_id) end
+    -- overlay.close()
+
+    kitty.delete(WATERMARK_ID)
     overlay.close()
 
     if not cell_w then
@@ -22,7 +26,7 @@ local function show()
     end
 
     local col, row = overlay.get_position()
-    current_id = math.random(1, 999999)
+    current_id = WATERMARK_ID
 
     overlay.claim_cells()
 
@@ -33,10 +37,12 @@ local function show()
 end
 
 local function hide()
-    if current_id then
-        kitty.delete(current_id)
-        current_id = nil
-    end
+    --if current_id then
+    --    kitty.delete(current_id)
+    --    current_id = nil
+    --end
+    kitty.delete(WATERMARK_ID)
+    current_id = nil
     overlay.close()
 end
 
