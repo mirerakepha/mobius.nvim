@@ -2,20 +2,20 @@
 local assets = vim.fn.expand("~/RustProjects/mobius/assets/")
 
 local map = {
-    rust        = assets .. "rust.png",
-    c           = assets .. "c.png",
-    cpp         = assets .. "cplusplus.png",   
-    python      = assets .. "python.png",
-    javascript  = assets .. "javascript.png",  
-    typescript  = assets .. "typescript.png",  
-    go          = assets .. "go.png",
-    lua         = assets .. "lua.png",
-    zig         = assets .. "zig.png",
-    sh          = assets .. "gnubash.png",
-    bash        = assets .. "gnubash.png",
-    css         = assets .. "css.png",
-    html        = assets .. "html5.png",
-    haskell     = assets .. "haskell.png",
+    rust        = assets .. "tinted_rust.png",
+    c           = assets .. "tinted_c.png",
+    cpp         = assets .. "tinted_cplusplus.png",   
+    python      = assets .. "tinted_python.png",
+    javascript  = assets .. "tinted_javascript.png",  
+    typescript  = assets .. "tinted_typescript.png",  
+    go          = assets .. "tinted_go.png",
+    lua         = assets .. "tinted_lua.png",
+    zig         = assets .. "tinted_zig.png",
+    sh          = assets .. "tinted_gnubash.png",
+    bash        = assets .. "tinted_gnubash.png",
+    css         = assets .. "tinted_css.png",
+    html        = assets .. "tinted_html5.png",
+    haskell     = assets .. "tinted_haskell.png",
 }
 
 return {

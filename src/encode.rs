@@ -1,16 +1,37 @@
 use std::fs;
+use base64::{engine::general_purpose, Engine};
+use image::{ImageBuffer, Rgba};
 
 pub struct EncodedImage {
     pub chunks: Vec<String>,
 }
 
 pub fn encode_png(path: &str) -> EncodedImage {
-    use base64::{engine::general_purpose, Engine};
-
-    // Read the PNG file as-is and base64 encode it
-    // f=100 tells Kitty to decode it as PNG natively
     let bytes = fs::read(path).expect("cannot read PNG");
-    let encoded = general_purpose::STANDARD.encode(&bytes);
+    let img = image::load_from_memory(&bytes).expect("cannot decode PNG");
+    let mut rgba = img.to_rgba8();
+
+    // pink/maroon accent tokyo night
+    let tint_r: f32 = 255.0;
+    let tint_g: f32 = 100.0;
+    let tint_b: f32 = 140.0;
+
+    for pixel in rgba.pixels_mut() {
+        let a = pixel[3] as f32 / 255.0;  // original alpha
+        if a > 0.01 {
+            // blend pixel color toward tint, keep structure visible
+            pixel[0] = (pixel[0] as f32 * 0.3 + tint_r * 0.7) as u8;
+            pixel[1] = (pixel[1] as f32 * 0.3 + tint_g * 0.7) as u8;
+            pixel[2] = (pixel[2] as f32 * 0.3 + tint_b * 0.7) as u8;
+            // set alpha to 40% so it's visible but watermark-like
+            pixel[3] = (a * 255.0 * 0.65) as u8;
+        }
+    }
+
+    // encode modified image back to PNG bytes
+    let mut buf = std::io::Cursor::new(Vec::new());
+    rgba.write_to(&mut buf, image::ImageFormat::Png).expect("cannot encode PNG");
+    let encoded = general_purpose::STANDARD.encode(buf.get_ref());
 
     let chunks: Vec<String> = encoded
         .as_bytes()
@@ -21,43 +42,26 @@ pub fn encode_png(path: &str) -> EncodedImage {
     EncodedImage { chunks }
 }
 
-/*
-use base64::{engine::general_purpose, Engine};
-use image::{imageops::FilterType, GenericImageView};
+pub fn save_tinted(path: &str, out_path: &str) {
+    let bytes = std::fs::read(path).expect("cannot read PNG");
+    let img = image::load_from_memory(&bytes).expect("cannot decode PNG");
+    let mut rgba = img.to_rgba8();
 
-pub struct EncodedImage {
-    pub chunks: Vec<String>,
-    pub width: u32,
-    pub height: u32,
-}
+    let tint_r: f32 = 255.0;
+    let tint_g: f32 = 100.0;
+    let tint_b: f32 = 140.0;
 
-pub fn encode_png(path: &str, cell_w: u32, cell_h: u32) -> EncodedImage {
-
-    let img = image::open(path).expect("Cannot Open Image");
-
-    // 6 terminal cells wide & keep aspect ratio
-    let target_px_w = cell_w * 6;
-    let target_px_h = cell_h * 6;
-    let resized = img.resize(target_px_w, target_px_h, FilterType::Lanczos3);
-
-    let (w, h) = resized.dimensions();
-
-    // Convert to rgba and apply opacity
-    let mut rgba = resized.to_rgba8();
     for pixel in rgba.pixels_mut() {
-        pixel[3] = (pixel[3] as f32 * 0.50) as u8;// 30% opacity
-    } 
+        let a = pixel[3] as f32 / 255.0;
+        if a > 0.01 {
+            pixel[0] = (pixel[0] as f32 * 0.3 + tint_r * 0.7) as u8;
+            pixel[1] = (pixel[1] as f32 * 0.3 + tint_g * 0.7) as u8;
+            pixel[2] = (pixel[2] as f32 * 0.3 + tint_b * 0.7) as u8;
+            pixel[3] = (a * 255.0 * 0.65) as u8;
+        }
+    }
 
-    let raw: Vec<u8> = rgba.into_raw();
-    let encoded = general_purpose::STANDARD.encode(&raw);
-
-    // Chunk into <= 4096 byte pieces, each chunk length must be multiple of 4
-    let chunks: Vec<String> = encoded
-        .as_bytes()
-        .chunks(4096)
-        .map(|c| String::from_utf8(c.to_vec()).unwrap())
-        .collect();
-
-    EncodedImage { chunks, width: w, height: h }
+    let mut buf = std::io::Cursor::new(Vec::new());
+    rgba.write_to(&mut buf, image::ImageFormat::Png).unwrap();
+    std::fs::write(out_path, buf.get_ref()).unwrap();
 }
-*/

@@ -1,12 +1,15 @@
 use crate::encode::EncodedImage;
-use std::io::{self, Write};
+use std::fs::OpenOptions;
+use std::io::{Write, BufWriter};
 
 pub fn transmit_and_place(img: &EncodedImage, _image_id: u32, col: u16, row: u16) {
-    let stdout = io::stdout();
-    let mut out = stdout.lock();
+    let tty = OpenOptions::new()
+        .write(true)
+        .open("/dev/tty")
+        .expect("cannot open /dev/tty");
+    let mut out = BufWriter::new(tty);
 
-    // Move cursor to target position first
-    // ESC[{row};{col}H  — positions cursor at row, col (1-based)
+    // position cursor
     write!(out, "\x1b[{};{}H", row, col).unwrap();
 
     let total = img.chunks.len();
@@ -15,17 +18,11 @@ pub fn transmit_and_place(img: &EncodedImage, _image_id: u32, col: u16, row: u16
         let m = if is_last { 0 } else { 1 };
 
         if i == 0 {
-            // a=T = transmit and display immediately at current cursor position
-            // f=32 = raw RGBA, s=width, v=height
-            // C=1 = don't move cursor after display
-            // q=2 = suppress terminal response
             write!(
                 out,
-                //"\x1b_Ga=T,f=32,s={},v={},C=1,q=2,m={};{}\x1b\\",
                 "\x1b_Ga=T,f=100,C=1,q=2,m={};{}\x1b\\",
-                /*img.width, img.height,*/ m, chunk
-            )
-            .unwrap();
+                m, chunk
+            ).unwrap();
         } else {
             write!(out, "\x1b_Gm={};{}\x1b\\", m, chunk).unwrap();
         }
