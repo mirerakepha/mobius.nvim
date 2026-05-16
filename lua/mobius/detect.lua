@@ -22,3 +22,4 @@ local map = {
 return {
     get_png = function(ft) return map[ft] end
 }
+
