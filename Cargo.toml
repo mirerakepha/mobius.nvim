@@ -7,3 +7,5 @@ edition = "2024"
 image   = { version = "0.25", features = ["png"] }   # PNG open + resize + RGBA
 base64  = { version = "0.22", features = ["std"] }
 clap    = { version = "4", features = ["derive"] }
+toml = "0.8"
+dirs_next = "2"

@@ -30,7 +30,6 @@ function M.claim_cells()
     end
 
 
-
     local opts = {
         relative = "editor",
         col = col,

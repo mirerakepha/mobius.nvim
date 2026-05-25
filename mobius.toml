@@ -1,0 +1,16 @@
+# edit to achieve your liking
+
+[tint]
+# RGB
+r = 255
+g = 100
+b = 140
+
+# Opacity
+opacity = 0.65
+
+# position placement
+# from right
+pad_right = 12
+# from bottom 
+pad_bottom = 6
