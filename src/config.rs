@@ -34,14 +34,15 @@ impl Default for Config {
     }
 }
 
-pub fn laod() -> Config {
+pub fn load() -> Config {
     let path = dirs_next::config_dir()
-        .map(|d| d.json("mobius/mobius.toml"));
+        .map(|d| d.join("mobius/mobius.toml"));
+
     if let Some(p) = path {
         if p.exists() {
             let content = fs::read_to_string(&p)
                 .unwrap_or_default();
-            retorn toml::from_str(&content)
+            return toml::from_str(&content)
                 .unwrap_or_default();
         }
     }

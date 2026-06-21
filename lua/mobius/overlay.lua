@@ -1,32 +1,46 @@
 local M = {}
-local kitty = require("mobius.kitty")
+
+local function load_config()
+    local cfg_path = vim.fn.expand("~/.config/mobius/mobius.toml")
+    local pad_right = 12
+    local pad_bottom = 6
+
+    if vim.fn.filereadable(cfg_path) == 1 then
+        for line in io.lines(cfg_path) do
+            local r = line:match("pad_right%s*=%s*(%d+)")
+            local b = line:match("pad_bottom%s*=%s*(%d+)")
+            if r then pad_right = tonumber(r) end
+            if b then pad_bottom = tonumber(b) end
+        end
+    end
+    
+    return pad_right, pad_bottom
+end
+
+-- local kitty = require("mobius.kitty")
 
 local LOGO_COLS = 6
 local LOGO_ROWS = 3
-local PAD_RIGHT = 12 -- from right edge
-local PAD_BOTTOM = 6 -- from bottom edge
+local win_id = nil
+local buf_id = nil
 
 function M.get_position()
+    local pad_right, pad_bottom = load_config()
     local ui = vim.api.nvim_list_uis()[1]
-    local term_cols = ui.width
-    local term_rows = ui.height
 
     -- bottom right corner minus padding
-    local col = term_cols - LOGO_COLS - PAD_RIGHT
-    local row = term_rows - LOGO_ROWS - PAD_BOTTOM
+    local col = ui.width - LOGO_COLS - pad_right
+    local row = ui.height - LOGO_ROWS - pad_bottom
 
     return col, row
 end
 
-local win_id = nil
-local buf_id = nil
-
 function M.claim_cells()
     local col, row = M.get_position()
 
-    if not buf_id then
+    if not buf_id or not vim.api.nvim_buf_is_valid(buf_id) then
         buf_id = vim.api.nvim_create_buf(false, true)
-        vim.api.nvim_buf_set_lines(buf_id, 0, -1, false, { "      ", "      ", "      " })
+        vim.api.nvim_buf_set_lines(buf_id, 0, -1, false, { "      ", "      ", "      ", "      " })
     end
 
 
@@ -46,7 +60,7 @@ function M.claim_cells()
         vim.api.nvim_win_set_config(win_id, opts)
     else
         win_id = vim.api.nvim_open_win(buf_id, false, opts)
-        vim.api.nvim_win_set_option(win_id, "winblend", 100) -- invisible
+        vim.wo[win_id].winblend = 100 -- invisible
     end
 end
 

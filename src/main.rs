@@ -1,5 +1,6 @@
 mod encode;
 mod kitty;
+mod config;
 use clap::Parser;
 
 #[derive(Parser)]
@@ -16,14 +17,15 @@ struct Args {
 fn main() {
 
     let args = Args::parse();
+    let cfg = config::load();
 
     if let Some(out_path) = args.out {
         // Save png and exit
-        encode::save_tinted(&args.png, &out_path);
+        encode::save_tinted(&args.png, &out_path, &cfg.tint);
         return;
     }
     
-    let img = encode::encode_png(&args.png /*, args.cell_w, args.cell_h */);
+    let img = encode::encode_png(&args.png /*, args.cell_w, args.cell_h */, &cfg.tint);
     
     kitty::transmit_and_place(&img, args.id, args.col, args.row);
     
