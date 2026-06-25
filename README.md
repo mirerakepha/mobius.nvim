@@ -115,6 +115,10 @@ Then restart Neovim.
 
 
 ---
+<img width="1440" height="777" alt="Screenshot From 2026-06-25 07-46-08" src="https://github.com/user-attachments/assets/ae6d75ca-ebc0-49ce-beb8-2f5570d2c173" />
+<img width="1440" height="777" alt="Screenshot From 2026-06-25 07-44-52" src="https://github.com/user-attachments/assets/3c5774b3-2e6d-4cdd-a46f-7f088014e23a" />
+<img width="1440" height="777" alt="Screenshot From 2026-06-25 07-43-58" src="https://github.com/user-attachments/assets/5f597462-551d-4fb5-a6f4-9beac5b2989c" />
+
 
 ##### How it works
 
